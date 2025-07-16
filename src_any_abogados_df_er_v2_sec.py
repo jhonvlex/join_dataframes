@@ -3,7 +3,6 @@ import pandas as pd
 import re
 from rapidfuzz.fuzz import ratio
 
-
 # Función que normaliza el número de contacto. Elimina simbolos especiales y elimina extensiones.
 def normalized_phone(phone):
     if not isinstance(phone, str):
