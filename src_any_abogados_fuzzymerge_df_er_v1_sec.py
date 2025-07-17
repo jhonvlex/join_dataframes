@@ -33,6 +33,7 @@ remove_words = [
 pattern_firma = r'\b(?:' + '|'.join(firm_words) + r')\b'
 pattern_remover = r'\b(?:' + '|'.join(remove_words ) + r')\b'
 
+"""
 def name_normalized(name):
 
     if not isinstance(name, str):
@@ -43,6 +44,28 @@ def name_normalized(name):
     name = re.sub(pattern_remover, '', name)                                             #Remueve las palabras contenidas en pattern_remover
     name = re.sub(r'[^\w\s]', '', name)                                                  #Remueve caracteres especiales                     
     name = re.sub(r'\s+', ' ', name).strip()                                             #Elimina espacios
+    return name
+"""
+def name_normalized(name):
+    if not isinstance(name, str):
+        return ""
+
+    # Elimina acentos
+    name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode('utf-8')
+    name = name.lower()
+
+    # Reemplaza guiones por espacios
+    name = name.replace("-", " ")
+
+    # Elimina palabras indeseadas
+    name = re.sub(pattern_remover, '', name)
+
+    # Elimina caracteres especiales excepto letras, números y espacios
+    name = re.sub(r'[^\w\s]', '', name)
+
+    # Elimina espacios extra
+    name = re.sub(r'\s+', ' ', name).strip()
+
     return name
 
 # Penalización por número de palabras diferentes
