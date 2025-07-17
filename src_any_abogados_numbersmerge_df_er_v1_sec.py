@@ -29,7 +29,7 @@ def merge_by_contact_number(df1, df2, df1_colname, df2_colname, df1_name, df2_na
 # Se recibe el dataframe orignal df y una lista de los nombres de las columnas a combinar, en orden de prioridad.
 # Se recibe el nombre de la nueva columna que agrupa las columnas de la lista.
 # Retorna un df con la nueva columna que agrupa las demas.
-def combinar_columnas_prioridad(df, columnas, nueva_columna):
+def combine_columns_by_priority(df, columnas, nueva_columna):
 
     df[nueva_columna] = None
     for col in columnas:
