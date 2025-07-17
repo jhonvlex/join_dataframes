@@ -29,6 +29,7 @@ def test(df):
     df["predicted"] = df.apply(lambda row: comparar_nombre_personalizada(row["name1"], row["name2"]), axis=1)
     return df
 
+# NUEVA LINEA
 
 def jaccard_sim(n1, n2):
     set1, set2 = set(n1.split()), set(n2.split())
