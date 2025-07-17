@@ -29,7 +29,6 @@ def test(df):
     df["predicted"] = df.apply(lambda row: comparar_nombre_personalizada(row["name1"], row["name2"]), axis=1)
     return df
 
-# NUEVA LINEA
 
 def jaccard_sim(n1, n2):
     set1, set2 = set(n1.split()), set(n2.split())
@@ -70,3 +69,5 @@ def ensemble_name_match(df, w_token=0.6, w_jaccard=0.3, w_penal=0.1, threshold=8
 
     # Ya no se genera 'match_true', asumimos que 'actual' ya está
     return df
+
+# V2
