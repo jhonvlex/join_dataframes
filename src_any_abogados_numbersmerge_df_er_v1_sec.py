@@ -52,4 +52,4 @@ def combine_columns_by_priority(df, columnas, nueva_columna):
     return df
 
 
-
+# V2
