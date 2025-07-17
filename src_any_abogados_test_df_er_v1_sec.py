@@ -30,9 +30,6 @@ def test(df):
     return df
 
 
-
-
-
 def jaccard_sim(n1, n2):
     set1, set2 = set(n1.split()), set(n2.split())
     if not set1 or not set2:

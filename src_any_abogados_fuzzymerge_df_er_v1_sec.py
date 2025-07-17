@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 import re
-import matplotlib.pyplot as plt
 import unicodedata
 from thefuzz import fuzz
 from rapidfuzz.fuzz import token_sort_ratio
@@ -144,21 +143,7 @@ def perfect_matches(df_nombres):
     return resultado
 
 # --
-from rapidfuzz.fuzz import ratio
 
-from rapidfuzz.fuzz import token_sort_ratio
-import pandas as pd
-
-from rapidfuzz.fuzz import token_sort_ratio
-import pandas as pd
-
-import pandas as pd
-from rapidfuzz.fuzz import token_sort_ratio
-
-import pandas as pd
-from rapidfuzz.fuzz import token_sort_ratio
-from rapidfuzz.fuzz import token_sort_ratio
-import pandas as pd
 
 def find_fuzzy_matches(df1, df2, df1_colname, df2_colname, threshold):
     """
