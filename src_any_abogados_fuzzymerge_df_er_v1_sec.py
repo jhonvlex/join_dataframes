@@ -33,19 +33,6 @@ remove_words = [
 pattern_firma = r'\b(?:' + '|'.join(firm_words) + r')\b'
 pattern_remover = r'\b(?:' + '|'.join(remove_words ) + r')\b'
 
-"""
-def name_normalized(name):
-
-    if not isinstance(name, str):
-        return ""
-
-    name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode('utf-8') #Elimina acentos
-    name = name.lower()                                                                  #Convierte el nombre en minusculas
-    name = re.sub(pattern_remover, '', name)                                             #Remueve las palabras contenidas en pattern_remover
-    name = re.sub(r'[^\w\s]', '', name)                                                  #Remueve caracteres especiales                     
-    name = re.sub(r'\s+', ' ', name).strip()                                             #Elimina espacios
-    return name
-"""
 def name_normalized(name):
     if not isinstance(name, str):
         return ""
@@ -169,15 +156,11 @@ def perfect_matches(df_nombres):
 # --
 
 def find_fuzzy_matches(df1, df2, df1_colname, df2_colname, threshold):
-    """
-    Para cada name1:
-    - Busca el mejor match en df2 según similitud.
-    - Asigna una columna 'score' con el valor de similitud.
-    - Asigna una columna 'actual' con 1 si pasa el threshold, 0 si no.
-    - Elimina duplicados en name2, conservando el de mayor score.
-    - Retorna un solo DataFrame con toda la información.
-    """
+    import re
+    from rapidfuzz.fuzz import ratio
 
+
+    # Limpieza inicial
     df1_clean = df1[df1[df1_colname].notna()].drop_duplicates(subset=df1_colname)
     df2_clean = df2[df2[df2_colname].notna()].drop_duplicates(subset=df2_colname)
 
@@ -191,7 +174,7 @@ def find_fuzzy_matches(df1, df2, df1_colname, df2_colname, threshold):
         best_match = None
 
         for candidate in lista_2:
-            score = token_sort_ratio(name, candidate)
+            score = ratio(name, candidate)
             if score > best_score:
                 best_score = score
                 best_match = candidate
@@ -203,10 +186,16 @@ def find_fuzzy_matches(df1, df2, df1_colname, df2_colname, threshold):
             "actual": int(best_score >= threshold)
         })
 
-    # Convertimos en DataFrame
     df_resultado = pd.DataFrame(resultados)
 
-    # Ordenamos por score descendente y eliminamos duplicados en name2
+    
+    # Ajuste según validación personalizada
+    df_resultado["actual"] = df_resultado.apply(
+        lambda row: row["actual"] if row["actual"] == 0 else int(extra_validacion(row["name1"], row["name2"])),
+        axis=1
+    )
+    
+    # Eliminar duplicados en name2, quedarse con el de mejor score
     df_resultado = df_resultado.sort_values("score", ascending=False)
     df_resultado = df_resultado.drop_duplicates(subset="name2", keep="first")
     df_resultado.reset_index(drop=True, inplace=True)
@@ -214,3 +203,27 @@ def find_fuzzy_matches(df1, df2, df1_colname, df2_colname, threshold):
     return df_resultado
 
 
+def extra_validacion(nombre1, nombre2):
+    """Valida si realmente son la misma persona comparando primer nombre y apellidos."""
+    palabras_1 = nombre1.lower().split()
+    palabras_2 = nombre2.lower().split()
+
+    # Validación básica: al menos 3 palabras
+    if len(palabras_1) < 3 or len(palabras_2) < 3:
+        return True  # no se puede validar correctamente
+
+    # Separar nombre y apellidos
+    nombre1_primero, apellido1_1, apellido1_2 = palabras_1[0], palabras_1[-2], palabras_1[-1]
+    nombre2_primero, apellido2_1, apellido2_2 = palabras_2[0], palabras_2[-2], palabras_2[-1]
+
+    # Si primer nombre difiere, no es la misma persona
+    if nombre1_primero != nombre2_primero:
+        return False
+
+    # Si uno de los apellidos difiere, tampoco es la misma persona
+    if apellido1_1 != apellido2_1 or apellido1_2 != apellido2_2:
+        return False
+
+    return True
+
+#V3

@@ -30,44 +30,32 @@ def test(df):
     return df
 
 
-def jaccard_sim(n1, n2):
-    set1, set2 = set(n1.split()), set(n2.split())
-    if not set1 or not set2:
-        return 0
-    return len(set1 & set2) / len(set1 | set2)
 
-def palabras_distintas(n1, n2):
-    set1, set2 = set(n1.split()), set(n2.split())
-    return len(set1.symmetric_difference(set2))
-
-def ensemble_name_match(df, w_token=0.6, w_jaccard=0.3, w_penal=0.1, threshold=80):
+def test2(df, threshold):
     """
-    Calcula un score de similitud ponderado entre pares de nombres y predice matches.
-    
-    Requiere que el DataFrame tenga columnas: 'name1', 'name2', y 'actual'.
+    Compara los nombres en cada fila a nivel de letras, usando similitud de Jaccard.
 
-    Devuelve:
-        DataFrame con columnas:
-        - score_ensemble: puntuación combinada
-        - match_pred: predicción binaria del modelo
-        - actual: etiqueta verdadera (ya debe estar en el DataFrame)
+    Agrega la columna 'predicted' con 1 si la similitud de Jaccard >= threshold, 0 en caso contrario.
     """
+
+    def jaccard_letras(n1, n2):
+        set1 = set(n1.lower().replace(" ", ""))
+        set2 = set(n2.lower().replace(" ", ""))
+
+        if not set1 or not set2:
+            return 0
+        
+        inter = set1 & set2
+        union = set1 | set2
+        return len(inter) / len(union)
+
     df = df.copy()
-
-    def calcular_score(row):
-        n1, n2 = row['name1'], row['name2']
-        score_token = token_sort_ratio(n1, n2)
-        score_jaccard = jaccard_sim(n1, n2) * 100
-        penal = palabras_distintas(n1, n2) * 10
-
-        return (w_token * score_token +
-                w_jaccard * score_jaccard -
-                w_penal * penal)
-
-    df["score_ensemble"] = df.apply(calcular_score, axis=1)
-    df["match_pred"] = df["score_ensemble"].apply(lambda x: 1 if x >= threshold else 0)
-
-    # Ya no se genera 'match_true', asumimos que 'actual' ya está
+    df["predicted"] = df.apply(
+        lambda row: int(jaccard_letras(row["name1"], row["name2"]) >= threshold),
+        axis=1
+    )
+    
     return df
 
-# V2
+
+# V3
