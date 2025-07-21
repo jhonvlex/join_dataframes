@@ -7,13 +7,14 @@ from time import sleep
 import random
 
 def extraer_emails_desde_web(df, columna_url):
-    # --- Normaliza la URL ---
+
+    # Normalizar URL
     def normalize_url(url):
         if isinstance(url, str) and not url.startswith(("http://", "https://")):
             return "https://" + url.strip()
         return url.strip() if isinstance(url, str) else None
 
-    # --- Limpia texto antes de aplicar regex ---
+    # Limpiar el texto
     def clean_text_before_regex(text):
         if not isinstance(text, str):
             return ""
@@ -22,21 +23,30 @@ def extraer_emails_desde_web(df, columna_url):
         keywords = ["Instagram", "LinkedIn", "Twitter", "Inicio", "Servicios", "Legal",
                     "Mensajes", "Account", "Bookings", "My", "Phone", "Email", "MAIL",
                     "Contacto", "Horario", "Mon-Fri", "Facebook", "X", "WhatsApp"]
+        
         pattern = r'\b(?:' + '|'.join(keywords) + r')\b'
         text = re.sub(pattern, " ", text, flags=re.IGNORECASE)
         text = re.sub(r'\b[A-Z]{3,}\b', " ", text)
         return re.sub(r'\s+', ' ', text).strip()
 
-    # --- Corrección de emails encontrados ---
+    # Corregir el email de palabras innecesarias
     def limpiar_email(email):
-        # Eliminar números iniciales antes del @
-        email = re.sub(r'^[0-9]+(?=[a-zA-Z_])', '', email)
+        try:
+            # Dividir en usuario y dominio
+            usuario, dominio = email.split('@', 1)
 
-        # Cortar cualquier cosa después de .com
-        if ".com" in email:
-            email = email[:email.index(".com") + 4]
+            # Eliminar números al principio del usuario
+            usuario = re.sub(r'^[0-9]+', '', usuario)
 
-        return email
+            # Cortar texto después de .com en el dominio
+            if ".com" in dominio:
+                dominio = dominio[:domain_index := dominio.index(".com") + 4]
+
+            return f"{usuario}@{dominio}"
+
+        except Exception:
+            return email  # Retornar sin modificar si hay error inesperado
+
 
     # --- Filtro para emails válidos ---
     def filtrar_emails_validos(lista):
